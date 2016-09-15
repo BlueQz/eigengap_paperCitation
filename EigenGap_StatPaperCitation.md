@@ -73,7 +73,6 @@ ctrl <- list(removePunctuation = list(preserve_intra_word_dashes = TRUE)
              #, wordLengths = c(4, 20) # remove short words like 'a' 
              #, weighting = function(x) weightSMART(x, spec = "nnn")
 )
-#Btmp  = as.tdm(as.character(text), 1:nrow(abs), stopwords = Top100Words, ignore.case = T)
 Btmp <- TermDocumentMatrix(vc, control =  ctrl)  ## 
 terms <- Btmp$dimnames$Terms
 cat( "after initial cleaning: number of words and documents:" ,dim(Btmp), '\n')   
@@ -83,7 +82,6 @@ cat( "after initial cleaning: number of words and documents:" ,dim(Btmp), '\n')
 
 ``` r
 B = spMatrix(i = Btmp$i, j = Btmp$j, x = Btmp$v, nrow = Btmp$nrow, ncol  = Btmp$ncol)         # frequency count
-#B = spMatrix(i = Btmp$i, j = Btmp$j, x = rep(1, length(Btmp$v)), nrow = Btmp$nrow, ncol  = Btmp$ncol) # non-weighted, 0-1
 rownames(B)  = Btmp$dimnames$Terms
 
 ######remove 's' 
@@ -102,7 +100,7 @@ idx1 <- match(paste0(terms[idx[!is.na(idx)]],'ed'),terms)
 idx2 <- match(terms[idx[!is.na(idx)]], terms)
 B[idx1,] <- B[idx1,]+B[idx2,]
 terms <- terms[-idx1];  B<- B[terms,]; #update terms, Btmp
-cat( "after initial cleaning + remov 's', 'ed': number of words and documents:"   ,dim(B), '\n')     ## 5237,635
+cat( "after initial cleaning + remov 's', 'ed': number of words and documents:"   ,dim(B), '\n')     
 ```
 
     ## after initial cleaning + remov 's', 'ed': number of words and documents: 5529 635
@@ -137,7 +135,7 @@ tmp = Drow%*%A
 L = tmp %*% Dcol
 e = irlba(L,nu = 50)
 
-## Fig 1
+## Fig 1, Scree plot of top 25 eigenvalues of weighted adjacency matrix.
 #par(mfcol = c(1,1), mar = c(5,4,4,2)+0.1)
 #pdf('../latex/imsart-ims/screeplot.pdf',width = 5,height = 5)
 par(mfcol = c(1,1),mar=c(3,3,1,1))
@@ -145,7 +143,7 @@ plot(1:25,e$d[1:25], cex=2, pch=15, type="b", lty=2,
      lwd=3, col="red", bg="red", xlab="", ylab="")
 ```
 
-![](EigenGap_StatisticianCitationNetwork_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](EigenGap_StatPaperCitation_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 ``` r
 #dev.off()
@@ -157,7 +155,7 @@ hist(e1$values,breaks = 50, main ="",xlab = "", ylab="", probability = T)
 lines(density(e1$values, bw =0.05),col="red")
 ```
 
-![](EigenGap_StatisticianCitationNetwork_files/figure-markdown_github/unnamed-chunk-4-2.png)
+![](EigenGap_StatPaperCitation_files/figure-markdown_github/unnamed-chunk-4-2.png)
 
 ``` r
 #dev.off()
@@ -189,14 +187,14 @@ hv <- Matrix(0,nrow(nX), nclust)
 for(i in 1:nclust) {hv[clust==i,i] <- 1}
 ord <- order(km_11$size,decreasing = T)
 hv <- hv[,ord]
-cat("volumn within and cross clusters:","\n")
+vol_clust <- t(hv)%*%A%*%hv
+cat("count of edges within and cross clusters:","\n")
 ```
 
-    ## volumn within and cross clusters:
+    ## count of edges within and cross clusters:
 
 ``` r
-vol_clust <- t(hv)%*%A%*%hv
-print(vol_clust)
+print(vol_clust) 
 ```
 
     ## 11 x 11 sparse Matrix of class "dgCMatrix"
@@ -212,6 +210,12 @@ print(vol_clust)
     ##  [9,]    8   1   2  10   .   1   6   . 290   .  1
     ## [10,]   15   6   7   4   .   .   .   1   . 114  3
     ## [11,]    .   .   1   .   2   .   1   .   1   3 64
+
+``` r
+cat("count of edges in and outside its own block:","\n")
+```
+
+    ## count of edges in and outside its own block:
 
 ``` r
 print(cbind(diag(vol_clust),rowSums(vol_clust)-diag(vol_clust)))
@@ -286,7 +290,7 @@ bestWords[,1:10]
 
 
 #Table 2
-topwords <- apply(bestWords[,1:10],MARGIN = 1, function(x) paste0(x,collapse = ", "))
+topwords <- apply(bestWords[,1:10], MARGIN = 1, function(x) paste0(x,collapse = ", "))
 results <- list()
 results$id = 1:nclust
 name11 <- c("Vari Selection","Mutiple Testing", "Semi/Non Para", "Functional Data", 
@@ -296,7 +300,7 @@ if(nclust == 11)  results$name <- name11
 results$size <-  km_11$size[ord]
 results$In <- as.integer(diag(vol_clust))
 results$Out <- as.integer(rowSums(vol_clust)-diag(vol_clust))
-results$topwords <- topwords[ord]                      
+results$topwords <- topwords                      
 results <- data.frame(results,row.names = NULL)  
 print( cbind(results[1:5,1:5],results[7:11,1:5]))
 ```
@@ -325,17 +329,17 @@ print( results[,c(2,6)] )
     ## 10        Learn Theory
     ## 11      Den Estimation
     ##                                                                                                                   topwords
-    ## 1                      reduction, dimension, sliced, inverse, central, subspace, regression, sufficient, response, average
-    ## 2             spatial, computational, predictive, maximum, likelihood, quality, gaussian, covariance, process, approximate
-    ## 3                   nonparametric, density, error, measurement, kernel, setting, observed, explanatory, measured, function
-    ## 4  asymptotic, semiparametric, nonparametric, additive, quantile, backfitting, longitudinal, partially, efficiency, spline
-    ## 5                           confidence, coverage, wavelet, construct, mean, lower, unknown, close, nonasymptotic, interest
-    ## 6                          dirichlet, process, posterior, prior, computation, bayesian, chain, clustering, markov, mixture
-    ## 7                       functional, principal, scalar, data, component, differential, function, approach, observed, random
-    ## 8                                    false, discovery, testing, hypotheses, rate, null, fdr, control, multiple, proportion
-    ## 9                       classification, learning, machine, minimization, risk, inequalities, binary, support, main, vector
-    ## 10                                 matrix, covariance, matrices, graphical, definite, norm, precision, graph, ini, inverse
-    ## 11                      lasso, selection, variable, penalty, oracle, regularization, select, linear, regression, algorithm
+    ## 1                       lasso, selection, variable, penalty, oracle, regularization, select, linear, regression, algorithm
+    ## 2                                    false, discovery, testing, hypotheses, rate, null, fdr, control, multiple, proportion
+    ## 3  asymptotic, semiparametric, nonparametric, additive, quantile, backfitting, longitudinal, partially, efficiency, spline
+    ## 4                       functional, principal, scalar, data, component, differential, function, approach, observed, random
+    ## 5                                  matrix, covariance, matrices, graphical, definite, norm, precision, graph, ini, inverse
+    ## 6                      reduction, dimension, sliced, inverse, central, subspace, regression, sufficient, response, average
+    ## 7             spatial, computational, predictive, maximum, likelihood, quality, gaussian, covariance, process, approximate
+    ## 8                       classification, learning, machine, minimization, risk, inequalities, binary, support, main, vector
+    ## 9                          dirichlet, process, posterior, prior, computation, bayesian, chain, clustering, markov, mixture
+    ## 10                          confidence, coverage, wavelet, construct, mean, lower, unknown, close, nonasymptotic, interest
+    ## 11                  nonparametric, density, error, measurement, kernel, setting, observed, explanatory, measured, function
 
 ``` r
 #latex code for table
@@ -344,34 +348,34 @@ print( results[,c(2,6)] )
 
 
 ## Fig 2
-if(nclust == 11){
-    colours <- c("red","yellow","green","blue","pink",'brown',
-                 "cyan","grey","darkcyan", 'deepskyblue','black')
-    vColor <- character(vcount(g2))      
-    for( i in 1:nclust){
-        vColor[which(clust == i)] <- colours[i]
-    }
-    
-    #pdf('../latex/imsart-ims/graph_visualization_11.pdf', width = 14, height = 10 )
-    set.seed(10)
-    plot(g2, vertex.color = vColor, 
-         vertex.label = "",
-         #vertex.label.cex=3, vertex.label.color='red', 
-         #vertex.label.dist = 0,
-         vertex.size=sqrt(degree(g2)),  asp=.7, 
-         layout = layout.auto,    # same as fruchterman.reingold
-         # equivalent to <100,layout.kamada.kawai,
-         # layout.fruchterman.reingold, 
-         # layout.drl
-         edge.color='grey',edge.width = 0.25,  margin=c(0,0,0,0.5)
-    )
-    ord <- order(table(clust),decreasing = T)
-    legend(x= c(1,1), y = c(1,1),legend = name11,  col = colours[ord], pch = 16, cex = 1)
-    #dev.off()
+
+colours <- c("red","yellow","green","blue","pink",'brown',
+             "cyan","grey","darkcyan", 'deepskyblue','black')
+vColor <- character(vcount(g2))      
+for( i in 1:11){
+    vColor[which(km_11$cluster == i)] <- colours[i]
 }
+#pdf('../latex/imsart-ims/graph_visualization_11.pdf', width = 14, height = 10 )
+set.seed(10)
+plot(g2, vertex.color = vColor, 
+     vertex.label = "",
+     #vertex.label.cex=3, vertex.label.color='red', 
+     #vertex.label.dist = 0,
+     vertex.size=sqrt(degree(g2)),  asp=.7, 
+     layout = layout.auto,    # same as fruchterman.reingold
+     # equivalent to <100,layout.kamada.kawai,
+     # layout.fruchterman.reingold, 
+     # layout.drl
+     edge.color='grey',edge.width = 0.25,  margin=c(0,0,0,0.5)
+)
+legend(x= c(1,1), y = c(1,1),legend = name11,  col = colours[ord], pch = 16, cex = 1)
 ```
 
-![](EigenGap_StatisticianCitationNetwork_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](EigenGap_StatPaperCitation_files/figure-markdown_github/unnamed-chunk-5-1.png)
+
+``` r
+#dev.off()
+```
 
 For K =20, the results are also interpretable. Our point is that we should reject the idea that there is one "right" answer to choose of the number of clusters. It is usually just an exploratory process.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -555,7 +559,7 @@ if(nclust ==20) results$name <- name20
 results$size <-  km_20$size[ord]
 results$In <- as.integer(diag(vol_clust))
 results$Out <- as.integer(rowSums(vol_clust)-diag(vol_clust))
-results$topwords <- topwords[ord]                      
+results$topwords <- topwords                      
 results <- data.frame(results,row.names = NULL)                     
 head(results)
 ```
@@ -567,13 +571,13 @@ head(results)
     ## 4  4   Cov Esitmation   46 312 122
     ## 5  5    Dim Reduction   45 336  32
     ## 6  6         Lasso II   44 292 262
-    ##                                                                                                                topwords
-    ## 1 differential, article, statistical, dynamic, equation, ordinary, compared, modeling, classification, cross-validation
-    ## 2                   reduction, dimension, sliced, inverse, central, subspace, regression, sufficient, average, variance
-    ## 3                     functional, principal, scalar, observed, data, component, function, response, irregular, analysis
-    ## 4              semiparametric, inference, parameter, nuisance, yield, maximum, likelihood, sampler, profile, consistent
-    ## 5                           selection, variable, lasso, oracle, penalty, algorithm, path, regularization, property, fan
-    ## 6                                 false, discovery, testing, hypotheses, rate, null, fdr, control, multiple, proportion
+    ##                                                                                              topwords
+    ## 1               false, discovery, testing, hypotheses, rate, null, fdr, control, multiple, proportion
+    ## 2         selection, variable, lasso, oracle, penalty, algorithm, path, regularization, property, fan
+    ## 3   functional, principal, scalar, observed, data, component, function, response, irregular, analysis
+    ## 4    matrix, covariance, matrices, graphical, norm, definite, high-dimensional, sparsity, ini, sample
+    ## 5 reduction, dimension, sliced, inverse, central, subspace, regression, sufficient, average, variance
+    ## 6                 lasso, high-dimensional, ipi, sparse, larger, selection, nonzero, ini, much, number
 
 ``` r
 #table 4
@@ -629,26 +633,26 @@ print(   results[,c(2,6)] )
     ## 19                   Designs
     ## 20            Semiparametric
     ##                                                                                                                 topwords
-    ## 1  differential, article, statistical, dynamic, equation, ordinary, compared, modeling, classification, cross-validation
-    ## 2                    reduction, dimension, sliced, inverse, central, subspace, regression, sufficient, average, variance
+    ## 1                                  false, discovery, testing, hypotheses, rate, null, fdr, control, multiple, proportion
+    ## 2                            selection, variable, lasso, oracle, penalty, algorithm, path, regularization, property, fan
     ## 3                      functional, principal, scalar, observed, data, component, function, response, irregular, analysis
-    ## 4               semiparametric, inference, parameter, nuisance, yield, maximum, likelihood, sampler, profile, consistent
-    ## 5                            selection, variable, lasso, oracle, penalty, algorithm, path, regularization, property, fan
-    ## 6                                  false, discovery, testing, hypotheses, rate, null, fdr, control, multiple, proportion
-    ## 7                                    lasso, high-dimensional, ipi, sparse, larger, selection, nonzero, ini, much, number
-    ## 8         minimization, risk, inequalities, classification, empirical, learning, penalized, convex, regularization, main
-    ## 9                       data, analysis, classification, discriminant, population, size, low, microarray, high, principal
+    ## 4                       matrix, covariance, matrices, graphical, norm, definite, high-dimensional, sparsity, ini, sample
+    ## 5                    reduction, dimension, sliced, inverse, central, subspace, regression, sufficient, average, variance
+    ## 6                                    lasso, high-dimensional, ipi, sparse, larger, selection, nonzero, ini, much, number
+    ## 7         longitudinal, semiparametric, asymptotic, working, data, correlation, profile, partially, estimator, normality
+    ## 8  differential, article, statistical, dynamic, equation, ordinary, compared, modeling, classification, cross-validation
+    ## 9                  dirichlet, process, posterior, prior, computation, chain, markov, mixture, distribution, hierarchical
     ## 10            additive, smoothing, spline, backfitting, smooth, penalized, generalized, fitting, nonparametric, converge
-    ## 11                           confidence, coverage, mean, construct, unknown, lower, wavelet, whose, close, nonasymptotic
-    ## 12                 nonparametric, error, measurement, kernel, setting, density, observed, explanatory, problem, measured
-    ## 13                     spatial, marginal, dependence, likelihood, multivariate, limit, distance, complex, maximum, joint
-    ## 14                       bayesian, prior, posterior, mixture, scale, shrinkage, corresponding, uncertainty, bayes, white
-    ## 15             spatial, gaussian, covariance, computational, process, maximum, markov, likelihood, quality, non-gaussian
-    ## 16                 dirichlet, process, posterior, prior, computation, chain, markov, mixture, distribution, hierarchical
-    ## 17        longitudinal, semiparametric, asymptotic, working, data, correlation, profile, partially, estimator, normality
-    ## 18                      matrix, covariance, matrices, graphical, norm, definite, high-dimensional, sparsity, ini, sample
-    ## 19                             quantile, model, regression, resampling, future, rank, score, varying, empirical, without
-    ## 20             orthogonal, constructing, frequentist, construction, empirical, likelihood, design, enjoy, seen, flexible
+    ## 11                       bayesian, prior, posterior, mixture, scale, shrinkage, corresponding, uncertainty, bayes, white
+    ## 12             spatial, gaussian, covariance, computational, process, maximum, markov, likelihood, quality, non-gaussian
+    ## 13                             quantile, model, regression, resampling, future, rank, score, varying, empirical, without
+    ## 14        minimization, risk, inequalities, classification, empirical, learning, penalized, convex, regularization, main
+    ## 15                           confidence, coverage, mean, construct, unknown, lower, wavelet, whose, close, nonasymptotic
+    ## 16                      data, analysis, classification, discriminant, population, size, low, microarray, high, principal
+    ## 17                 nonparametric, error, measurement, kernel, setting, density, observed, explanatory, problem, measured
+    ## 18                     spatial, marginal, dependence, likelihood, multivariate, limit, distance, complex, maximum, joint
+    ## 19             orthogonal, constructing, frequentist, construction, empirical, likelihood, design, enjoy, seen, flexible
+    ## 20              semiparametric, inference, parameter, nuisance, yield, maximum, likelihood, sampler, profile, consistent
 
 ``` r
 #print(xtable(    cbind(results[1:10,1:5],results[11:20,1:5]) ))
@@ -661,6 +665,7 @@ Extra tables and visualization
 ``` r
 # visualization for the core in the whole plot
 #pdf("../latex/imsart-ims/graph_visualization_2.pdf", width =12,  height = 6)
+
 Vcolor <- character(nrow(p2p))
 Vcolor[] <-"white"
 Vcolor[core>3] <- vColor
@@ -672,7 +677,7 @@ plot(g, vertex.color = Vcolor, vertex.label= "",
 )
 ```
 
-![](EigenGap_StatisticianCitationNetwork_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](EigenGap_StatPaperCitation_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ``` r
 #dev.off()
@@ -689,7 +694,7 @@ idx <- which(as.matrix(A)==1,arr.ind = T)
 plot(idx[,1],idx[,2],col= "blue", pch =".", xlab="", ylab="")
 ```
 
-![](EigenGap_StatisticianCitationNetwork_files/figure-markdown_github/unnamed-chunk-7-2.png)
+![](EigenGap_StatPaperCitation_files/figure-markdown_github/unnamed-chunk-7-2.png)
 
 ``` r
 #dev.off()
@@ -699,7 +704,7 @@ idx.sort <- which(A.sort ==1, arr.ind =  1)
 plot(idx.sort[,1],idx.sort[,2],col= "blue", pch =".",xlab="", ylab="")
 ```
 
-![](EigenGap_StatisticianCitationNetwork_files/figure-markdown_github/unnamed-chunk-7-3.png)
+![](EigenGap_StatPaperCitation_files/figure-markdown_github/unnamed-chunk-7-3.png)
 
 ``` r
 #dev.off()
