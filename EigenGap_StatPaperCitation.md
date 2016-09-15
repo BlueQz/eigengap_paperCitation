@@ -245,47 +245,7 @@ for(i in 1:nclust){
     bestWords[i,] = (names(vals)[order(-vals)[1:20]])
     #wordcloud( words= names(vals),freq = vals, min.freq  = sort(vals,decreasing = T)[20], random.order = F, rot.per = 0, scale = c(2,0.5))
 }
-bestWords[,1:10]
-```
-
-    ##       [,1]             [,2]             [,3]            [,4]          
-    ##  [1,] "lasso"          "selection"      "variable"      "penalty"     
-    ##  [2,] "false"          "discovery"      "testing"       "hypotheses"  
-    ##  [3,] "asymptotic"     "semiparametric" "nonparametric" "additive"    
-    ##  [4,] "functional"     "principal"      "scalar"        "data"        
-    ##  [5,] "matrix"         "covariance"     "matrices"      "graphical"   
-    ##  [6,] "reduction"      "dimension"      "sliced"        "inverse"     
-    ##  [7,] "spatial"        "computational"  "predictive"    "maximum"     
-    ##  [8,] "classification" "learning"       "machine"       "minimization"
-    ##  [9,] "dirichlet"      "process"        "posterior"     "prior"       
-    ## [10,] "confidence"     "coverage"       "wavelet"       "construct"   
-    ## [11,] "nonparametric"  "density"        "error"         "measurement" 
-    ##       [,5]          [,6]             [,7]           [,8]         
-    ##  [1,] "oracle"      "regularization" "select"       "linear"     
-    ##  [2,] "rate"        "null"           "fdr"          "control"    
-    ##  [3,] "quantile"    "backfitting"    "longitudinal" "partially"  
-    ##  [4,] "component"   "differential"   "function"     "approach"   
-    ##  [5,] "definite"    "norm"           "precision"    "graph"      
-    ##  [6,] "central"     "subspace"       "regression"   "sufficient" 
-    ##  [7,] "likelihood"  "quality"        "gaussian"     "covariance" 
-    ##  [8,] "risk"        "inequalities"   "binary"       "support"    
-    ##  [9,] "computation" "bayesian"       "chain"        "clustering" 
-    ## [10,] "mean"        "lower"          "unknown"      "close"      
-    ## [11,] "kernel"      "setting"        "observed"     "explanatory"
-    ##       [,9]            [,10]        
-    ##  [1,] "regression"    "algorithm"  
-    ##  [2,] "multiple"      "proportion" 
-    ##  [3,] "efficiency"    "spline"     
-    ##  [4,] "observed"      "random"     
-    ##  [5,] "ini"           "inverse"    
-    ##  [6,] "response"      "average"    
-    ##  [7,] "process"       "approximate"
-    ##  [8,] "main"          "vector"     
-    ##  [9,] "markov"        "mixture"    
-    ## [10,] "nonasymptotic" "interest"   
-    ## [11,] "measured"      "function"
-
-``` r
+#bestWords[,1:10]
 #dev.off()
 
 
@@ -392,10 +352,10 @@ hv <- Matrix(0,nrow(nX), nclust)
 for(i in 1:nclust) { hv[km_20$cluster ==i,i] <- 1 }
 ord <- order(km_20$size,decreasing = T)
 hv <- hv[,ord]
-cat("volumn within and cross clusters:","\n")
+cat("count of edges within and cross clusters:","\n")
 ```
 
-    ## volumn within and cross clusters:
+    ## count of edges within and cross clusters:
 
 ``` r
 vol_clust <- t(hv)%*%A%*%hv
@@ -447,6 +407,12 @@ print(vol_clust)
     ## [20,]  . 36
 
 ``` r
+cat("count of edges in and out its own cluster:","\n")
+```
+
+    ## count of edges in and out its own cluster:
+
+``` r
 print(cbind(diag(vol_clust),rowSums(vol_clust)-diag(vol_clust)))
 ```
 
@@ -482,74 +448,8 @@ for(i in 1:nclust){
     bestWords[i,] = (names(vals)[order(-vals)[1:20]])
     #wordcloud( words= names(vals),freq = vals, min.freq  = sort(vals,decreasing = T)[20], random.order = F, rot.per = 0, scale = c(2,0.5))
 }
-bestWords[,1:10]
-```
+#bestWords[,1:10]
 
-    ##       [,1]             [,2]               [,3]            
-    ##  [1,] "false"          "discovery"        "testing"       
-    ##  [2,] "selection"      "variable"         "lasso"         
-    ##  [3,] "functional"     "principal"        "scalar"        
-    ##  [4,] "matrix"         "covariance"       "matrices"      
-    ##  [5,] "reduction"      "dimension"        "sliced"        
-    ##  [6,] "lasso"          "high-dimensional" "ipi"           
-    ##  [7,] "longitudinal"   "semiparametric"   "asymptotic"    
-    ##  [8,] "differential"   "article"          "statistical"   
-    ##  [9,] "dirichlet"      "process"          "posterior"     
-    ## [10,] "additive"       "smoothing"        "spline"        
-    ## [11,] "bayesian"       "prior"            "posterior"     
-    ## [12,] "spatial"        "gaussian"         "covariance"    
-    ## [13,] "quantile"       "model"            "regression"    
-    ## [14,] "minimization"   "risk"             "inequalities"  
-    ## [15,] "confidence"     "coverage"         "mean"          
-    ## [16,] "data"           "analysis"         "classification"
-    ## [17,] "nonparametric"  "error"            "measurement"   
-    ## [18,] "spatial"        "marginal"         "dependence"    
-    ## [19,] "orthogonal"     "constructing"     "frequentist"   
-    ## [20,] "semiparametric" "inference"        "parameter"     
-    ##       [,4]             [,5]           [,6]          [,7]              
-    ##  [1,] "hypotheses"     "rate"         "null"        "fdr"             
-    ##  [2,] "oracle"         "penalty"      "algorithm"   "path"            
-    ##  [3,] "observed"       "data"         "component"   "function"        
-    ##  [4,] "graphical"      "norm"         "definite"    "high-dimensional"
-    ##  [5,] "inverse"        "central"      "subspace"    "regression"      
-    ##  [6,] "sparse"         "larger"       "selection"   "nonzero"         
-    ##  [7,] "working"        "data"         "correlation" "profile"         
-    ##  [8,] "dynamic"        "equation"     "ordinary"    "compared"        
-    ##  [9,] "prior"          "computation"  "chain"       "markov"          
-    ## [10,] "backfitting"    "smooth"       "penalized"   "generalized"     
-    ## [11,] "mixture"        "scale"        "shrinkage"   "corresponding"   
-    ## [12,] "computational"  "process"      "maximum"     "markov"          
-    ## [13,] "resampling"     "future"       "rank"        "score"           
-    ## [14,] "classification" "empirical"    "learning"    "penalized"       
-    ## [15,] "construct"      "unknown"      "lower"       "wavelet"         
-    ## [16,] "discriminant"   "population"   "size"        "low"             
-    ## [17,] "kernel"         "setting"      "density"     "observed"        
-    ## [18,] "likelihood"     "multivariate" "limit"       "distance"        
-    ## [19,] "construction"   "empirical"    "likelihood"  "design"          
-    ## [20,] "nuisance"       "yield"        "maximum"     "likelihood"      
-    ##       [,8]             [,9]             [,10]             
-    ##  [1,] "control"        "multiple"       "proportion"      
-    ##  [2,] "regularization" "property"       "fan"             
-    ##  [3,] "response"       "irregular"      "analysis"        
-    ##  [4,] "sparsity"       "ini"            "sample"          
-    ##  [5,] "sufficient"     "average"        "variance"        
-    ##  [6,] "ini"            "much"           "number"          
-    ##  [7,] "partially"      "estimator"      "normality"       
-    ##  [8,] "modeling"       "classification" "cross-validation"
-    ##  [9,] "mixture"        "distribution"   "hierarchical"    
-    ## [10,] "fitting"        "nonparametric"  "converge"        
-    ## [11,] "uncertainty"    "bayes"          "white"           
-    ## [12,] "likelihood"     "quality"        "non-gaussian"    
-    ## [13,] "varying"        "empirical"      "without"         
-    ## [14,] "convex"         "regularization" "main"            
-    ## [15,] "whose"          "close"          "nonasymptotic"   
-    ## [16,] "microarray"     "high"           "principal"       
-    ## [17,] "explanatory"    "problem"        "measured"        
-    ## [18,] "complex"        "maximum"        "joint"           
-    ## [19,] "enjoy"          "seen"           "flexible"        
-    ## [20,] "sampler"        "profile"        "consistent"
-
-``` r
 topwords <- apply(bestWords[,1:10],MARGIN = 1, function(x) paste0(x,collapse = ", "))
 results <- list()
 results$id = 1:nclust
@@ -821,7 +721,8 @@ print(table(paper_core4[c(6,5)]))
     ##   Spatial(bayesian)                           0      23              0
 
 ``` r
-print(head(paper_core4[1:100,4:6]))
+#ten papers from the core, abstracts and its interpretation by clust11, clust20
+print(paper_core4[1:10,4:6])
 ```
 
     ##                                                                                                                                                                  keywords
@@ -831,10 +732,18 @@ print(head(paper_core4[1:100,4:6]))
     ## 16                     statistical learning;fast rates of convergence;oracle inequalities;regularization;classification;aggregation;model selection;high-dimensional data
     ## 17                                                                                   identifiability;projection;ridge regression;sparsity;thresholding;variable selection
     ## 21 autocovariance matrices;blessing of dimensionality;eigenanalysis;fast convergence rates;multivariate time series;ratio-based estimator;strength of factors;white noise
-    ##           clust11           clust20
-    ## 6        Bayesian           Designs
-    ## 9      Cov Matrix    Cov Esitmation
-    ## 13     Cov Matrix    Cov Esitmation
-    ## 16 Classification Learning Theory I
-    ## 17 Vari Selection           Lasso I
-    ## 21     Cov Matrix    Cov Esitmation
+    ## 23                      aggregation;regression;classification;oracle inequalities;finite sample bounds;generalized linear models;logistic regression;minimax lower bounds
+    ## 30                                                              covariance tapering;gaussian process;model selection;one-step sparse estimation;scad;spatial linear model
+    ## 37                                                                                                  linear regression;model selection;functional regression;factor models
+    ## 38                                                                                                              adaptive confidence sets;nonparametric hypothesis testing
+    ##            clust11            clust20
+    ## 6         Bayesian            Designs
+    ## 9       Cov Matrix     Cov Esitmation
+    ## 13      Cov Matrix     Cov Esitmation
+    ## 16  Classification  Learning Theory I
+    ## 17  Vari Selection            Lasso I
+    ## 21      Cov Matrix     Cov Esitmation
+    ## 23  Classification  Learning Theory I
+    ## 30         Spatial  Spatial(bayesian)
+    ## 37 Functional Data                FDA
+    ## 38    Learn Theory Learning Theory II
